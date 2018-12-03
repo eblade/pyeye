@@ -1,6 +1,6 @@
 # Python-Eye
 
-A HTML window to explorative python. Triggered from your favorite editor.
+A HTML window to explorative python. Triggered from your favorit editor.
 
 Disclaimer: Well, just look at it.
 
