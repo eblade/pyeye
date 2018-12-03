@@ -1,0 +1,128 @@
+<!DOCTYPE HTML>
+
+<html>
+   <head>
+      <meta charset="utf-8"/>
+
+      <style>
+        body {
+            scroll-behavior: smooth;
+            background-color: #333;
+            color: #ddd;
+            padding: 5pt;
+        }
+        .request {
+            margin-bottom: 5pt;
+        }
+        .output {
+            font-family: monospace;
+            border-left: 10pt solid #888;
+            padding-left: 5pt;
+        }
+        .stderr {
+            color: red;
+            border-left: 10pt solid #e23;
+            padding-left: 5pt;
+        }
+        .result {
+            font-family: monospace;
+            background-color: #555;
+            border-left: 10pt solid #333;
+            padding-left: 5pt;
+        }
+
+        table.dataframe {
+            margin: 0;
+            font-family: Helvetica;
+            border-collapse: collapse;
+            border: none;
+        }
+        table.dataframe tr {
+            border: none;
+        }
+        table.dataframe td, table.dataframe th {
+            margin: 0;
+            border: 1px solid #888;
+            padding-left: 0.25em;
+            padding-right: 0.25em;
+        }
+        table.dataframe th:not(:empty) {
+            background-color: #444;
+            text-align: left;
+            font-weight: normal;
+        }
+        table.dataframe tr:nth-child(2) th:empty {
+            border-left: none;
+            border-right: 1px dashed #888;
+        }
+        table.dataframe td {
+            border: 1px solid #888;
+            background-color: #333;
+        }
+      </style>
+
+
+      <script type = "text/javascript">
+         function LoadWebSocket() {
+
+            if ("WebSocket" in window) {
+               //alert("WebSocket is supported by your Browser!");
+
+               // Let us open a web socket
+               var ws = new WebSocket("ws://localhost:8080/websocket");
+
+               ws.onopen = function() {
+
+                  // Web Socket is connected, send data using send()
+                  //ws.send("Message to send");
+                  //alert("Message is sent...");
+               };
+
+               ws.onmessage = function (evt) {
+                  var received_msg = evt.data;
+                  var obj = JSON.parse(received_msg);
+                  var div_id = "request_" + obj.id;
+                  var result_div = document.getElementById(div_id);
+                  if (!result_div) {
+                    document.getElementById("results").innerHTML += "<div class=\"request\" id=\"" + div_id + "\"></div>";
+                    var result_div = document.getElementById(div_id);
+                  }
+                  if (obj.status === 'running') {
+                    result_div.innerHTML = "<i>Running...</i>";
+                  } else {
+                    result_div.innerHTML = "<div class=\"output stdout\">" + obj.stdout + "</div>";
+                    result_div.innerHTML += "<div class=\"output stderr\">" + obj.stderr + "</div>";
+                    if (obj.is_eval === true && obj.status === 'done') {
+                        result_div.innerHTML += "<div class=\"result\">" + obj.result + "</div>";
+                    }
+                  }
+                  window.location = "#" + div_id;
+                  //alert("Message is received: " + received_msg);
+               };
+
+               ws.onclose = function() {
+
+                  // websocket is closed.
+                  alert("Connection is closed...");
+               };
+            } else {
+
+               // The browser doesn't support WebSocket
+               alert("WebSocket NOT supported by your Browser!");
+            }
+         }
+
+        window.onload = function(e) {
+            LoadWebSocket();
+        }
+      </script>
+
+   </head>
+
+   <body>
+      <div id="results">
+      </div>
+
+   </body>
+</html>
+
